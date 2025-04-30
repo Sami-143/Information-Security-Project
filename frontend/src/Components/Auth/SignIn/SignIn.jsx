@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { FcGoogle } from 'react-icons/fc';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
-import { useGoogleLogin } from "@react-oauth/google";
 import 'react-toastify/dist/ReactToastify.css';
+import authApi from '../../../Api/authApi';
 
 const SignIn = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -40,39 +39,6 @@ const SignIn = () => {
       toast.error(error.message || 'Sign in failed');
     }
   };
-
-  const responseGoogle = async (authResult) => {
-    try {
-      console.log('Google login response:', authResult);
-      if (authResult["code"]) {
-        // const result = await googleAuth(authResult.code);
-        // if (result.error) {
-        //   console.log('Google Auth Error:', result.error);
-        //   toast.error("Google sign-in failed!");
-        //   return;
-        // }
-        // console.log(result.data);
-        // const { user, token } = result.data;
-        // console.log('Google SignIn Success:', user, token);
-        // localStorage.setItem('token', token);
-        console.log(authResult.code);
-        toast.success("Successfully signed in with Google!");
-        navigate('/oauth-success');
-      } else {
-        console.log('Authorization code not received');
-        toast.error("Google sign-in failed!");
-      }
-    } catch (e) {
-      console.log('Google SignIn Exception:', e.message);
-      toast.error("Something went wrong with Google sign-in");
-    }
-  };
-
-  const googleLogin = useGoogleLogin({
-    onSuccess: responseGoogle,
-    onError: responseGoogle,
-    flow: "auth-code",
-  });
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800 p-4">
@@ -123,22 +89,7 @@ const SignIn = () => {
             >
               Sign In
             </button>
-          </form>
-
-          <div className="my-4 text-center text-gray-500">or</div>
-
-          <button
-            onClick={googleLogin}
-            type="button"
-            className="mt-1 tracking-wide font-semibold bg-white text-gray-100 w-full py-4 rounded-lg hover:bg-gray-300 cursor-pointer transition-all duration-300 ease-in-out flex items-center justify-center focus:shadow-outline focus:outline-none"
-          >
-            <img
-              src="https://img.icons8.com/color/48/000000/google-logo.png"
-              alt="Google logo"
-              className="w-6 h-6 mr-2"
-            />
-            <span className="text-gray-700 font-medium">Sign up with Google</span>
-          </button>
+          </form>          
 
           <p className="text-sm text-center text-gray-600 mt-4">
             Don't have an account?{' '}

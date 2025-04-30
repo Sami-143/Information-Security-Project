@@ -1,6 +1,5 @@
 // src/components/SignUp.js
 import React, { useState } from 'react';
-import { FcGoogle } from 'react-icons/fc';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import { toast, ToastContainer } from 'react-toastify';
 import { Link, useNavigate } from 'react-router-dom';
@@ -40,15 +39,12 @@ const SignUp = () => {
       const data = await authApi.signUp(name, email, password);
       localStorage.setItem('token', data.access_token);
       toast.success('Account created successfully!');
-      navigate('/dashboard'); // Redirect to your dashboard or desired route
+      navigate('/otp-verification');
     } catch (error) {
       toast.error(error);
     }
   };
 
-  const handleGoogleSignUp = () => {
-    window.location.href = 'http://localhost:8000/auth/google'; // Backend endpoint for Google OAuth
-  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800 p-4">
@@ -98,10 +94,8 @@ const SignUp = () => {
                 className="w-full p-3 pr-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
 
-- ::contentReference[oaicite:11]{index=11}
 
- 
-{showPassword ? (
+              {showPassword ? (
                 <AiOutlineEyeInvisible
                   className="absolute right-3 top-11 text-xl text-gray-600 cursor-pointer"
                   onClick={togglePasswordVisibility}
@@ -124,17 +118,9 @@ const SignUp = () => {
 
           <div className="my-4 text-center text-gray-500">or</div>
 
-          <button
-            onClick={handleGoogleSignUp}
-            className="w-full flex items-center justify-center gap-2 bg-white text-gray-700 border border-gray-300 py-3 rounded-lg hover:shadow-md transition duration-300"
-          >
-            <FcGoogle className="text-2xl" />
-            Sign Up with Google
-          </button>
-
           <p className="text-sm text-center text-gray-600 mt-4">
             Already have an account?{' '}
-            <Link to="/login" className="text-blue-600 hover:underline">
+            <Link to="/" className="text-blue-600 hover:underline">
               Log In
             </Link>
           </p>
