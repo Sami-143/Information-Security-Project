@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import authApi from '../Api/authApi';
 
+
 export const verifyOtp = createAsyncThunk(
   '/verify-email',
   async (payload, { rejectWithValue }) => {

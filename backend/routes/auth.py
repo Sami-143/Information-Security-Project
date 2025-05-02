@@ -54,7 +54,7 @@ async def signup(user: UserSignUp):
         "otp_expires_at": otp_expiry
     }
     user_collection.insert_one(user_data)
-
+    print(user)
     try:
         await send_email(
             to=user.email,
@@ -128,3 +128,24 @@ async def resend_otp(data: ResendOtpRequest):
         raise HTTPException(status_code=500, detail="Failed to resend OTP email.")
 
     return {"message": "New OTP sent successfully."}
+
+@router.post("/make-admin")
+async def make_admin(data: UserSignUp):
+    existing_user = user_collection.find_one({"email": data.email})
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    hashed_password = hash_password(data.password)
+
+    user_data = {
+        "name": data.name,
+        "email": data.email,
+        "password": hashed_password,
+        "role": "admin",
+        "is_verified": True,
+        "otp_code": None,
+        "otp_expires_at": None
+    }
+
+    user_collection.insert_one(user_data)
+    return {"message": "Admin user created successfully."}

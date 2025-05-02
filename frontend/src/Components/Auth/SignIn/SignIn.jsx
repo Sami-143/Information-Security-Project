@@ -4,12 +4,16 @@ import { Link, useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import authApi from '../../../Api/authApi';
+import ReCAPTCHA from 'react-google-recaptcha';
+import reCaptcha from '../reCatpcha';
 
 const SignIn = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+
+  const { capchaToken, setCapchaToken, recaptchaRef, handleRecaptcha } = reCaptcha();
 
   const togglePasswordVisibility = () => {
     setShowPassword(prev => !prev);
@@ -26,14 +30,18 @@ const SignIn = () => {
       return;
     }
 
+    if (!capchaToken) {
+      toast.error("Please complete the reCAPTCHA.");
+      return;
+    }
+
     try {
       console.log('Signing in...');
-      // Replace this with your actual API call
       const data = await authApi.signIn(email, password);
       console.log('SignIn Success:', data);
       localStorage.setItem('token', data.access_token);
       toast.success('Signed in successfully!');
-      navigate('/oauth-success');
+      navigate('/dashboard');
     } catch (error) {
       console.log('SignIn Error:', error);
       toast.error(error.message || 'Sign in failed');
@@ -81,6 +89,15 @@ const SignIn = () => {
               >
                 {showPassword ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
               </div>
+            </div>
+
+            {/* reCAPTCHA */}
+            <div className="flex justify-center">
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                sitekey={import.meta.env.VITE_SITE_KEY}
+                onChange={handleRecaptcha}
+              />
             </div>
 
             <button

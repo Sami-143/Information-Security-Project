@@ -1,18 +1,22 @@
-// src/components/SignUp.js
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import { toast, ToastContainer } from 'react-toastify';
 import { Link, useNavigate } from 'react-router-dom';
 import authApi from '../../../Api/authApi';
 import 'react-toastify/dist/ReactToastify.css';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState(null);
+  const recaptchaRef = useRef(null);
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
   });
+
   const navigate = useNavigate();
 
   const togglePasswordVisibility = () => {
@@ -26,6 +30,10 @@ const SignUp = () => {
     }));
   };
 
+  const handleCaptchaChange = (token) => {
+    setCaptchaToken(token);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const { name, email, password } = formData;
@@ -35,16 +43,23 @@ const SignUp = () => {
       return;
     }
 
+    if (!captchaToken) {
+      toast.error('Please complete the reCAPTCHA!');
+      return;
+    }
+
     try {
       const data = await authApi.signUp(name, email, password);
-      localStorage.setItem('token', data.access_token);
-      toast.success('Account created successfully!');
+
+      // Save email for OTP verification
+      localStorage.setItem('email', email);
+
+      toast.success('Account created! Please verify the OTP sent to your email.');
       navigate('/otp-verification');
     } catch (error) {
       toast.error(error);
     }
   };
-
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800 p-4">
@@ -94,7 +109,6 @@ const SignUp = () => {
                 className="w-full p-3 pr-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
 
-
               {showPassword ? (
                 <AiOutlineEyeInvisible
                   className="absolute right-3 top-11 text-xl text-gray-600 cursor-pointer"
@@ -106,6 +120,15 @@ const SignUp = () => {
                   onClick={togglePasswordVisibility}
                 />
               )}
+            </div>
+
+            {/* reCAPTCHA */}
+            <div className="flex justify-center mt-4">
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                sitekey={import.meta.env.VITE_SITE_KEY}
+                onChange={handleCaptchaChange}
+              />
             </div>
 
             <button

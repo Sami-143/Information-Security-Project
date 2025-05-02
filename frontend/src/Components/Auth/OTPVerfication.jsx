@@ -68,7 +68,7 @@ const OTPVerification = () => {
     <div className="min-h-screen flex items-center justify-center bg-[#0f172a] px-4">
       <div className="bg-[#1e293b] p-8 rounded-lg shadow-lg w-full max-w-md border border-[#334155]">
         <h2 className="text-2xl font-bold text-white text-center mb-6">Verify Your Email</h2>
-        <p className="text-gray-400 text-sm text-center mb-6">Enter the 6-digit code sent to <span className="text-green-400">{email}</span></p>
+        <p className="text-gray-400 text-sm text-center mb-6">Enter the 6-digit code sent to <span className="text-blue-400">{email}</span></p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="flex justify-center gap-2">
@@ -82,7 +82,7 @@ const OTPVerification = () => {
                 onChange={(e) => handleChange(e, index)}
                 onKeyDown={(e) => handleKeyDown(e, index)}
                 ref={(el) => (inputRefs.current[index] = el)}
-                className="w-10 h-10 text-center text-lg text-white bg-[#0f172a] border border-[#334155] rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-10 h-10 text-center text-lg text-white bg-[#0f172a] border border-[#334155] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             ))}
           </div>
@@ -90,7 +90,7 @@ const OTPVerification = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-md font-semibold transition"
+            className="w-full bg-blue-900 hover:bg-blue-700 text-white py-2 rounded-md font-semibold transition"
           >
             {loading ? 'Verifying...' : 'Verify OTP'}
           </button>
@@ -99,7 +99,7 @@ const OTPVerification = () => {
         <div className="text-center mt-4">
           <p className="text-sm text-gray-400">
             Didn't get the code?{' '}
-            <button onClick={handleResend} className="text-green-400 hover:underline">
+            <button onClick={handleResend} className="text-blue-400 hover:underline">
               Resend OTP
             </button>
           </p>
