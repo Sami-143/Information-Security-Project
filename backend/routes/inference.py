@@ -17,12 +17,12 @@ CLIENT = InferenceHTTPClient(
 )
 
 @router.post("/scan")
-@limiter.limit("5/minute")  # Allow max 5 logins per minute per IP
-async def scan_document(request: Request, image: UploadFile = File(...), current_user=Depends(get_current_user)):
+async def scan_document(request: Request, image: UploadFile = File(...)):
+    print('here')
     # Validate file type
     if not image.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="Only image files are allowed.")
-
+    print('hereiam')
     try:
         # Save to a temporary file
         filename = f"{uuid.uuid4().hex}_{image.filename}"

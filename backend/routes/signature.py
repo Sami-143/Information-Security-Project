@@ -1,6 +1,6 @@
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends, Request
-from odmantic import AIOEngine
-from db.database import engine
+
+from db.database import user_collection
 from models.document import Document
 from utils.crypto import hash_data, verify_signature
 from utils.asymmetricKeys import get_private_key
@@ -10,6 +10,7 @@ import base64
 import os
 from datetime import datetime
 from utils.rate_limiter import limiter
+import time
 
 router = APIRouter()
 
@@ -25,9 +26,10 @@ async def verify_signed_doc(
         # Save the uploaded file temporarily
         temp_path = f"temp/{image.filename}"
         os.makedirs("temp", exist_ok=True)
+        content = await image.read()
         with open(temp_path, "wb") as f:
-            content = await image.read()
             f.write(content)
+
 
         # Hash the file
         file_hash = hash_data(content)
@@ -47,9 +49,10 @@ async def verify_signed_doc(
             public_key=publicKey,
             created_at=datetime.utcnow()
         )
-        await engine.save(document)
+        user_collection.insert_one(document.dict())
 
-        os.remove(temp_path)
+        # time.sleep(0.1)
+        # os.remove(temp_path)
         return {"success": True, "message": "Signature verified. Document is authentic.", "doc_id": str(document.id)}
 
     except Exception as e:
