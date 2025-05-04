@@ -1,0 +1,17 @@
+fastapi
+uvicorn
+motor
+odmantic
+python-dotenv
+passlib[bcrypt]
+pydantic
+pydantic[email]
+python-jose[cryptography]
+uuid
+inference_sdk
+python-multipart
+slowapi
+jose
+httpx
+pymongo
+opencv-python-headless
