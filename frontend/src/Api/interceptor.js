@@ -2,7 +2,7 @@
 import axios from 'axios';
 import { store } from '../Redux/store.js';
 
-const BASE_URL = 'http://localhost:8000';
+const BASE_URL = 'https://dead-michele-sami-143-d0da6b25.koyeb.app/';
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,

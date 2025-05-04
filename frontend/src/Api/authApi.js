@@ -2,7 +2,7 @@
 
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'https://dead-michele-sami-143-d0da6b25.koyeb.app';
 
 const authApi = {
   signIn: async (email, password) => {
