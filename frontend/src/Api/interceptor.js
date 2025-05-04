@@ -2,13 +2,12 @@
 import axios from 'axios';
 import { store } from '../Redux/store.js';
 
-const BASE_URL = 'http://localhost:8000'; // or your deployed URL
+const BASE_URL = 'http://localhost:8000';
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
 });
 
-// Automatically attach token from redux state (or localStorage fallback)
 axiosInstance.interceptors.request.use(
   (config) => {
     const state = store.getState();

@@ -33,7 +33,7 @@ async def scan_document(request: Request, image: UploadFile = File(...)):
             shutil.copyfileobj(image.file, buffer)
 
         # Run inference
-        result = CLIENT.infer(temp_path, model_id="yolov8-number-plate-detection/2")
+        result = CLIENT.infer(temp_path, model_id="np_detection-xgvjf/2")
 
         # Cleanup temp image
         os.remove(temp_path)

@@ -24,61 +24,45 @@ const UserDashboard = () => {
     const [displaySize, setDisplaySize] = useState({ width: 1, height: 1 });
     const [threshold, setThreshold] = useState(0.5);
     const { capchaToken, recaptchaRef, handleRecaptcha } = reCaptcha();
-
+    const [showMenu, setShowMenu] = useState(false);
+    
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
     const handleFileChange = (e) => {
         const selected = e.target.files[0];
-        if (selected) {
-            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-            if (!validTypes.includes(selected.type)) {
-                toast.error("Only JPG, JPEG, PNG, or WEBP images are allowed.");
-                setFile(null);
-                setImagePreview(null);
-                return;
-            }
-
-            setFile(selected);
-            setImagePreview(URL.createObjectURL(selected));
-            setResult(null);
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+        if (!selected || !validTypes.includes(selected.type)) {
+            toast.error("Only JPG, JPEG, PNG, or WEBP images are allowed.");
+            return;
         }
+        setFile(selected);
+        setImagePreview(URL.createObjectURL(selected));
+        setResult(null);
     };
 
     const handleSignOut = () => {
         dispatch(logout());
-        toast.success("Signed out successfully");
+        toast.success("Logged out successfully");
         navigate("/signin", { replace: true });
     };
 
     const handleScan = async () => {
-        console.log('hereiam')
-        if (!file) {
-            toast.error("Please upload an image first.");
-            return;
-        }
+        if (!file) return toast.error("Please upload an image first.");
+        if (!capchaToken) return toast.error("Please complete the reCAPTCHA.");
 
-        if (!capchaToken) {
-            toast.error("Please complete the reCAPTCHA.");
-            return;
-        }
-        console.log('herer')
         try {
             await verifyRecaptcha(capchaToken);
-        } catch (err) {
-            toast.error("reCAPTCHA failed verification.");
-            return;
+        } catch {
+            return toast.error("reCAPTCHA failed verification.");
         }
 
         try {
             setLoading(true);
-            // Create a new File object with the same content
-            const buffer = await file.arrayBuffer(); // read once
+            const buffer = await file.arrayBuffer();
             const blob = new Blob([buffer], { type: file.type });
-
             const fileForVerification = new File([blob], file.name, { type: file.type });
             const fileForScan = new File([blob], file.name, { type: file.type });
-
 
             const fileBuffer = await fileForVerification.arrayBuffer();
             const { privateKey, publicKey } = await generateKeyPair();
@@ -87,8 +71,7 @@ const UserDashboard = () => {
             const base64Signature = arrayBufferToBase64(signature);
             const exportedPublicKey = await exportPublicKey(publicKey);
             const base64PublicKey = arrayBufferToBase64(exportedPublicKey);
-            const pemPublicKey =
-                "-----BEGIN PUBLIC KEY-----\n" +
+            const pemPublicKey = "-----BEGIN PUBLIC KEY-----\n" +
                 base64PublicKey.match(/.{1,64}/g).join("\n") +
                 "\n-----END PUBLIC KEY-----";
 
@@ -97,11 +80,7 @@ const UserDashboard = () => {
             verificationFormData.append("signature", base64Signature);
             verificationFormData.append("publicKey", pemPublicKey);
 
-            console.log('jere')
-
             const verificationResponse = await documentApi.sendSignedDocument(verificationFormData);
-            console.log("Verification response:", verificationResponse);
-
             if (!verificationResponse?.success) {
                 toast.error("Image has been tampered with or invalid signature.");
                 setLoading(false);
@@ -114,11 +93,10 @@ const UserDashboard = () => {
                 setLoading(false);
                 return;
             }
+
             setResult(scanResult.data);
-            console.log("Scan result:", scanResult.data);
             toast.success("Image scanned successfully!");
         } catch (error) {
-            console.error("Error:", error);
             toast.error(error.response?.data?.detail || "Scan failed.");
         } finally {
             setLoading(false);
@@ -126,33 +104,73 @@ const UserDashboard = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center py-10 px-4 relative">
-            <button
-                onClick={handleSignOut}
-                className="absolute top-6 right-6 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md"
-            >
-                Sign Out
-            </button>
+        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white flex flex-col items-center py-10 px-4">
+            {/* Account Dropdown Menu */}
+            <div className="absolute top-6 right-6">
+                <div className="relative inline-block text-left">
+                    <button
+                        type="button"
+                        className="inline-flex justify-center w-full rounded-md border border-gray-600 shadow-sm px-4 py-2 bg-gray-800 text-sm font-medium text-white hover:bg-gray-700 focus:outline-none"
+                        id="menu-button"
+                        aria-expanded="true"
+                        aria-haspopup="true"
+                        onClick={() => setShowMenu(!showMenu)}
+                    >
+                        Account
+                        <svg
+                            className="-mr-1 ml-2 h-5 w-5"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                            aria-hidden="true"
+                        >
+                            <path
+                                fillRule="evenodd"
+                                d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.25 8.27a.75.75 0 01-.02-1.06z"
+                                clipRule="evenodd"
+                            />
+                        </svg>
+                    </button>
 
-            <h1 className="text-3xl font-bold mb-6 text-gray-200">License Plate Detection Dashboard</h1>
+                    {showMenu && (
+                        <div
+                            className="origin-top-right absolute right-0 mt-2 w-44 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10"
+                            role="menu"
+                            aria-orientation="vertical"
+                            aria-labelledby="menu-button"
+                        >
+                            <div className="py-1 text-sm text-gray-700" role="none">
+                                <button
+                                    className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                                    onClick={handleSignOut}
+                                    role="menuitem"
+                                >
+                                    Sign Out
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
 
-            <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 w-full max-w-2xl shadow-lg">
-                <label className="block mb-2 text-sm font-medium text-gray-300">Upload Image</label>
-                <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="mb-4 block w-full text-sm text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700"
-                />
+            <h1 className="text-4xl font-extrabold mb-6 text-blue-400">License Plate Detection</h1>
 
-                <p className="text-xs text-gray-400 mb-4">
-                    Allowed formats: JPG, JPEG, PNG, WEBP
-                </p>
+            <div className="bg-gray-800/90 rounded-xl shadow-2xl p-8 max-w-3xl w-full border border-gray-700">
+                <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-300 mb-1">Upload Image</label>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="w-full text-gray-100 file:bg-blue-600 file:text-white file:rounded-md file:px-4 file:py-2 file:mr-4 file:font-medium file:hover:bg-blue-700"
+                    />
+                    <p className="text-xs text-gray-400 mt-2">Supported: JPG, JPEG, PNG, WEBP</p>
+                </div>
 
                 {imagePreview && (
                     <>
-                        <div className="flex items-center gap-3 mb-4">
-                            <label className="text-sm text-gray-400">Confidence Threshold:</label>
+                        <div className="flex items-center gap-4 mb-4">
+                            <label className="text-sm text-gray-300">Confidence Threshold:</label>
                             <input
                                 type="range"
                                 min="0"
@@ -162,37 +180,32 @@ const UserDashboard = () => {
                                 onChange={(e) => setThreshold(parseFloat(e.target.value))}
                                 className="w-full"
                             />
-                            <span className="text-gray-200 text-sm">{(threshold * 100).toFixed(0)}%</span>
+                            <span className="text-sm text-white">{(threshold * 100).toFixed(0)}%</span>
                         </div>
 
-                        <div className="relative border border-gray-700 rounded-md overflow-hidden">
+                        <div className="relative border border-gray-600 rounded-lg overflow-hidden">
                             <img
                                 src={imagePreview}
                                 alt="Preview"
                                 className="w-full max-h-[500px] object-contain"
-                                onLoad={(e) =>
-                                    setDisplaySize({
-                                        width: e.target.naturalWidth,
-                                        height: e.target.naturalHeight,
-                                    })
-                                }
+                                onLoad={(e) => setDisplaySize({ width: e.target.naturalWidth, height: e.target.naturalHeight })}
                             />
 
-                            {result?.predictions?.filter((p) => p.confidence >= threshold).map((prediction, index) => {
+                            {result?.predictions?.filter(p => p.confidence >= threshold).map((p, idx) => {
                                 const scaleX = 100 / result.image.width;
                                 const scaleY = 100 / result.image.height;
-                                const left = (prediction.x - prediction.width / 2) * scaleX;
-                                const top = (prediction.y - prediction.height / 2) * scaleY;
-                                const boxWidth = prediction.width * scaleX;
-                                const boxHeight = prediction.height * scaleY;
+                                const left = (p.x - p.width / 2) * scaleX;
+                                const top = (p.y - p.height / 2) * scaleY;
+                                const boxWidth = p.width * scaleX;
+                                const boxHeight = p.height * scaleY;
 
                                 return (
                                     <motion.div
-                                        key={index}
+                                        key={idx}
                                         initial={{ opacity: 0, scale: 0.8 }}
                                         animate={{ opacity: 1, scale: 1 }}
                                         transition={{ duration: 0.3 }}
-                                        className="absolute border-2 border-yellow-500 bg-yellow-500/10 text-white text-xs px-1 rounded"
+                                        className="absolute border-2 border-green-400 bg-green-400/20 text-white text-xs px-1 rounded"
                                         style={{
                                             left: `${left}%`,
                                             top: `${top}%`,
@@ -200,8 +213,8 @@ const UserDashboard = () => {
                                             height: `${boxHeight}%`,
                                         }}
                                     >
-                                        <div className="absolute -top-6 left-0 bg-yellow-600 text-white text-xs font-semibold px-2 py-1 rounded shadow-md">
-                                            Plate: {(prediction.confidence * 100).toFixed(1)}%
+                                        <div className="absolute -top-6 left-0 bg-green-600 text-xs px-2 py-1 rounded shadow">
+                                            {(p.confidence * 100).toFixed(1)}%
                                         </div>
                                     </motion.div>
                                 );
@@ -210,7 +223,7 @@ const UserDashboard = () => {
                     </>
                 )}
 
-                <div className="flex justify-center mt-4">
+                <div className="flex justify-center mt-6">
                     <ReCAPTCHA
                         ref={recaptchaRef}
                         sitekey={import.meta.env.VITE_SITE_KEY}
@@ -222,15 +235,15 @@ const UserDashboard = () => {
                 <button
                     onClick={handleScan}
                     disabled={loading}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-md mt-4 w-full"
+                    className="mt-6 w-full py-3 rounded-md bg-blue-600 hover:bg-blue-700 font-semibold transition-colors duration-300"
                 >
-                    {loading ? "Scanning..." : "Scan Image"}
+                    {loading ? "🔍 Scanning..." : "Scan Image"}
                 </button>
 
                 {result?.predictions?.length > 0 && (
-                    <div className="mt-6 bg-gray-700 p-4 rounded-md border border-gray-600 text-gray-100">
-                        <h3 className="text-lg font-semibold mb-2">Scan Summary</h3>
-                        <p>{result.predictions.filter(p => p.confidence >= threshold).length} license plate(s) detected above {(threshold * 100).toFixed(0)}% threshold.</p>
+                    <div className="mt-6 p-4 bg-gray-700 border border-gray-600 rounded-lg text-gray-100">
+                        <h3 className="text-lg font-bold mb-2">Scan Summary</h3>
+                        <p>{result.predictions.filter(p => p.confidence >= threshold).length} plate(s) detected above {(threshold * 100).toFixed(0)}% threshold.</p>
                         <p>Highest confidence: <span className="text-green-400 font-semibold">{(Math.max(...result.predictions.map(p => p.confidence)) * 100).toFixed(1)}%</span></p>
                     </div>
                 )}
