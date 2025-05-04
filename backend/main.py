@@ -11,7 +11,7 @@ app = FastAPI()
 # CORS settings to allow frontend (React) access
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # Allow all origins for now (adjust later if needed)
+    allow_origins=["https://cyber-is-secure.netlify.app"],  # Allow all origins for now (adjust later if needed)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
