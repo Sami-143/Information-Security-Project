@@ -24,6 +24,7 @@ const GuestRoute = ({ children }) => {
 
 const AdminRoute = ({ children }) => {
   const { token, user } = useSelector((state) => state.auth);
+  console.log(user);
   if (!token) return <Navigate to="/signin" replace />;
   if (user?.role !== "admin") return <Navigate to="/dashboard" replace />;
   return children;

@@ -3,7 +3,7 @@ import { toast } from 'react-toastify';
 import documentApi from '../../Api/documentApi.js';
 import { motion } from 'framer-motion';
 import { logout } from '../../Redux/authSlice.js';
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
     generateKeyPair,
@@ -25,9 +25,10 @@ const UserDashboard = () => {
     const [threshold, setThreshold] = useState(0.5);
     const { capchaToken, recaptchaRef, handleRecaptcha } = reCaptcha();
     const [showMenu, setShowMenu] = useState(false);
-    
+
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const userRole = useSelector((state) => state.auth.user?.role); // Get user role from Redux
 
     const handleFileChange = (e) => {
         const selected = e.target.files[0];
@@ -156,6 +157,7 @@ const UserDashboard = () => {
             <h1 className="text-4xl font-extrabold mb-6 text-blue-400">License Plate Detection</h1>
 
             <div className="bg-gray-800/90 rounded-xl shadow-2xl p-8 max-w-3xl w-full border border-gray-700">
+
                 <div className="mb-6">
                     <label className="block text-sm font-medium text-gray-300 mb-1">Upload Image</label>
                     <input
@@ -239,6 +241,15 @@ const UserDashboard = () => {
                 >
                     {loading ? "🔍 Scanning..." : "Scan Image"}
                 </button>
+
+                {userRole === 'admin' && (
+                    <button
+                        onClick={() => navigate('/admin-dashboard')}
+                        className="mt-4 w-full py-3 rounded-md bg-purple-600 hover:bg-purple-700 font-semibold transition-colors duration-300"
+                    >
+                        Admin Dashboard
+                    </button>
+                )}
 
                 {result?.predictions?.length > 0 && (
                     <div className="mt-6 p-4 bg-gray-700 border border-gray-600 rounded-lg text-gray-100">

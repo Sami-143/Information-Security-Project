@@ -3,15 +3,19 @@ import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import authApi from '../../../Api/authApi';
 import ReCAPTCHA from 'react-google-recaptcha';
 import reCaptcha from '../reCatpcha';
+import { verifyRecaptcha } from '../../../Api/captchaApi';
+import { loginUser } from '../../../Redux/authSlice';
+import { useDispatch } from 'react-redux';
+
 
 const SignIn = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const { capchaToken, setCapchaToken, recaptchaRef, handleRecaptcha } = reCaptcha();
 
@@ -35,16 +39,21 @@ const SignIn = () => {
       return;
     }
 
-    try {
-      console.log('Signing in...');
-      const data = await authApi.signIn(email, password);
-      console.log('SignIn Success:', data);
-      localStorage.setItem('token', data.access_token);
-      toast.success('Signed in successfully!');
+
+    const resultAction = await dispatch(loginUser({email, password}));
+    console.log(resultAction);
+    if (loginUser.fulfilled.match(resultAction)) {
+      toast.success('Login successful!');
       navigate('/dashboard');
-    } catch (error) {
-      console.log('SignIn Error:', error);
-      toast.error(error.message || 'Sign in failed');
+    } else {
+      if (resultAction?.payload?.detail == "Email not verified.") {
+        toast.error("Email not verified. Please verify your email to login.");
+        navigate("/verify-otp", { replace: true });
+        return;
+      }
+      else {
+        toast.error(resultAction.payload || 'Login failed');
+      }
     }
   };
 
@@ -106,7 +115,7 @@ const SignIn = () => {
             >
               Sign In
             </button>
-          </form>          
+          </form>
 
           <p className="text-sm text-center text-gray-600 mt-4">
             Don't have an account?{' '}

@@ -50,8 +50,10 @@ const AdminDashboard = () => {
     const fetchUsers = async () => {
       try {
         const data = await adminApi.getAllUsers();
+        console.log("Fetched user data:", data); // DEBUG: check API data
         setUsers(data);
       } catch (err) {
+        console.error("Error fetching users:", err); // DEBUG: show error
         toast.error("Failed to fetch users");
       } finally {
         setLoading(false);
@@ -62,6 +64,8 @@ const AdminDashboard = () => {
   }, []);
 
   const chartData = generateChartData();
+  console.log("Current users state:", users); // DEBUG: current state of users
+  console.log("Generated chart data:", chartData); // DEBUG: chart data
 
   return (
     <div className="min-h-screen bg-[#0d1117] text-white px-6 py-10">
@@ -123,20 +127,23 @@ const AdminDashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {users.map((user) => (
-                <tr key={user.id} className="hover:bg-[#21262d] transition">
-                  <td className="py-3 px-6 border-b border-[#30363d]">{user.name}</td>
-                  <td className="py-3 px-6 border-b border-[#30363d]">{user.email}</td>
-                  <td className="py-3 px-6 border-b border-[#30363d]">
-                    {user.is_verified ? (
-                      <span className="text-green-400 font-semibold">✅ Yes</span>
-                    ) : (
-                      <span className="text-red-400 font-semibold">❌ No</span>
-                    )}
-                  </td>
-                  <td className="py-3 px-6 border-b border-[#30363d] capitalize">{user.role}</td>
-                </tr>
-              ))}
+              {users.map((user) => {
+                console.log("Rendering user row:", user); // DEBUG: individual user
+                return (
+                  <tr key={user.id} className="hover:bg-[#21262d] transition">
+                    <td className="py-3 px-6 border-b border-[#30363d]">{user.name}</td>
+                    <td className="py-3 px-6 border-b border-[#30363d]">{user.email}</td>
+                    <td className="py-3 px-6 border-b border-[#30363d]">
+                      {user.is_verified ? (
+                        <span className="text-green-400 font-semibold">✅ Yes</span>
+                      ) : (
+                        <span className="text-red-400 font-semibold">❌ No</span>
+                      )}
+                    </td>
+                    <td className="py-3 px-6 border-b border-[#30363d] capitalize">{user.role}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}

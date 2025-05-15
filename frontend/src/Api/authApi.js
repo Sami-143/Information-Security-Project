@@ -5,12 +5,9 @@ import axios from 'axios';
 const API_BASE_URL = 'http://localhost:8000';
 
 const authApi = {
-  signIn: async (email, password) => {
+  login: async (credentials) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/signin`, {
-        email,
-        password,
-      });
+      const response = await axios.post(`${API_BASE_URL}/signin`, credentials);
       return response.data;
     } catch (error) {
       throw error.response?.data?.detail || 'Sign in failed';

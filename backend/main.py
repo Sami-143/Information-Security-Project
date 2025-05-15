@@ -4,8 +4,7 @@ from routes import auth, inference, admin, signature, security  # Import the nec
 from slowapi.errors import RateLimitExceeded
 from fastapi.responses import JSONResponse
 from slowapi.middleware import SlowAPIMiddleware
-from utils.rate_limiter import limiter  # Import rate limiter (optional, if you want rate limiting)
-
+from utils.rate_limiter import limiter  
 app = FastAPI()
 
 # CORS settings to allow frontend (React) access
@@ -31,7 +30,7 @@ async def rate_limit_handler(request, exc):
 
 # Include the routers (you can add more routes as needed)
 app.include_router(auth.router)
-app.include_router(inference.router, prefix="/model")  # You may not have this yet, but it's added for future use
-app.include_router(admin.router, prefix="/admin")  # Same as above
-app.include_router(signature.router, prefix="/documents")  # Same as above
-app.include_router(security.router, prefix="/security")  # Same as above
+app.include_router(inference.router, prefix="/model")
+app.include_router(admin.router, prefix="/admin")  
+app.include_router(signature.router, prefix="/documents")  
+app.include_router(security.router, prefix="/security")

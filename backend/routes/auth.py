@@ -66,7 +66,7 @@ async def signup(user: UserSignUp):
         raise HTTPException(status_code=500, detail="Failed to send verification email.")
 
     access_token = create_access_token({"sub": user.email})
-    return {"access_token": access_token, "token_type": "bearer", "message": "Signup successful. OTP sent to email."}
+    return {"access_token": access_token, "message": "Signup successful. OTP sent to email.", "user": {"email": user.email, "role": "user"}}
 
 @router.post("/signin")
 async def signin(user: UserSignIn):
@@ -78,7 +78,10 @@ async def signin(user: UserSignIn):
         raise HTTPException(status_code=403, detail="Email not verified. Please verify OTP.")
 
     access_token = create_access_token({"sub": user.email})
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {"access_token": access_token, "user": {
+            "email": user.email,
+            "role": db_user["role"] if db_user else None,
+        }}
 
 # ✨ New API: Verify OTP
 @router.post("/verify-email")
