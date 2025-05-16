@@ -1,4 +1,4 @@
-# 🚘 License Plate Detection System
+# 🚘 Secure ALPR and Verification
 
 A web-based AI-powered system for real-time license plate detection using deep learning and computer vision, integrated with modern security measures for safe and reliable vehicle identification.
 
